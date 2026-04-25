@@ -1,0 +1,57 @@
+---
+import { VIDEO } from "../data/videoConfig.ts";
+
+const id = VIDEO.id?.trim();
+const showVideo = !!id;
+---
+
+{showVideo && (
+  <section class="max-w-4xl mx-auto px-5 pt-2 pb-8">
+    <div
+      id="video-frame"
+      class="relative w-full aspect-video bg-neutral-900 rounded-xl overflow-hidden border border-neutral-200 shadow-sm"
+      data-video-id={id}
+    >
+      <button
+        id="video-play"
+        type="button"
+        class="absolute inset-0 group flex items-center justify-center cursor-pointer"
+        aria-label={`${VIDEO.title} 영상 재생`}
+      >
+        <img
+          src={`https://img.youtube.com/vi/${id}/hqdefault.jpg`}
+          alt={VIDEO.title}
+          loading="lazy"
+          class="w-full h-full object-cover"
+        />
+        <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+        <div class="absolute w-16 h-16 md:w-20 md:h-20 rounded-full bg-red-600 group-hover:bg-red-500 flex items-center justify-center shadow-2xl transition-transform group-hover:scale-105">
+          <svg viewBox="0 0 24 24" class="w-8 h-8 md:w-10 md:h-10 text-white ml-1" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </button>
+    </div>
+    {VIDEO.caption && (
+      <p class="text-center text-sm md:text-base text-neutral-500 mt-3 leading-relaxed">{VIDEO.caption}</p>
+    )}
+  </section>
+)}
+
+<script>
+  const frame = document.getElementById("video-frame");
+  const playBtn = document.getElementById("video-play");
+  const id = frame?.dataset.videoId;
+  if (frame && playBtn && id) {
+    playBtn.addEventListener("click", () => {
+      const iframe = document.createElement("iframe");
+      iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+      iframe.title = "YouTube video player";
+      iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
+      iframe.allowFullscreen = true;
+      iframe.className = "absolute inset-0 w-full h-full border-0";
+      frame.replaceChildren(iframe);
+    });
+  }
+</script>

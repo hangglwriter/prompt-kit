@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { CATEGORIES } from "../data/categories.ts";
 import SampleSlider from "../components/SampleSlider.astro";
+import VideoEmbed from "../components/VideoEmbed.astro";
 ---
 
 <BaseLayout>
@@ -13,6 +14,8 @@ import SampleSlider from "../components/SampleSlider.astro";
       카테고리를 고르고 원하는 내용을 넣으면, 프롬프트가 자동으로 완성됩니다.
     </p>
   </section>
+
+  <VideoEmbed />
 
   <SampleSlider />
 
