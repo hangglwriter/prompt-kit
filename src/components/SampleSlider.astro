@@ -1,0 +1,352 @@
+---
+import { SAMPLES, GALLERY_SECTIONS } from "../data/samples.ts";
+
+const labelMap = Object.fromEntries(GALLERY_SECTIONS.map((g) => [g.id, { label: g.label, emoji: g.emoji, link: g.link ?? "" }]));
+
+const items = SAMPLES.map((s, i) => ({
+  i,
+  src: s.src,
+  label: labelMap[s.category]?.label ?? s.category,
+  emoji: labelMap[s.category]?.emoji ?? "✨",
+  link: labelMap[s.category]?.link ?? "",
+}));
+
+const dataJson = JSON.stringify(items);
+---
+
+<section class="py-6">
+  <div class="relative max-w-6xl mx-auto px-5">
+    <button
+      id="slider-prev"
+      type="button"
+      aria-label="이전"
+      class="slider-nav left-1"
+    >‹</button>
+    <button
+      id="slider-next"
+      type="button"
+      aria-label="다음"
+      class="slider-nav right-1"
+    >›</button>
+
+    <div id="slider-track" class="slider-track" data-items={dataJson}>
+      {[...items, ...items].map((it, idx) => (
+        <button
+          type="button"
+          class="slider-card"
+          data-index={it.i}
+          aria-label={`${it.label} 샘플 ${it.i + 1} 크게 보기`}
+        >
+          <img src={it.src} alt={`${it.label} 샘플`} loading="lazy" class="slider-img" />
+        </button>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true" aria-label="이미지 크게 보기">
+  <button id="lb-close" type="button" aria-label="닫기" class="lb-close">×</button>
+  <button id="lb-prev" type="button" aria-label="이전 이미지" class="lb-nav lb-prev">‹</button>
+  <button id="lb-next" type="button" aria-label="다음 이미지" class="lb-nav lb-next">›</button>
+  <div class="lb-content">
+    <img id="lb-img" alt="" />
+    <div class="lb-info">
+      <div class="lb-meta">
+        <span id="lb-emoji" class="lb-emoji"></span>
+        <span id="lb-label" class="lb-label"></span>
+        <span id="lb-counter" class="lb-counter"></span>
+      </div>
+      <a id="lb-cta" href="#" class="lb-cta hidden">이 카테고리에서 만들기 →</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .slider-track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 4px 14px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .slider-track::-webkit-scrollbar { display: none; }
+  .slider-card {
+    position: relative;
+    flex-shrink: 0;
+    width: 200px;
+    height: 260px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    transition: transform 0.18s ease, border-color 0.18s ease;
+    scroll-snap-align: start;
+    cursor: pointer;
+    padding: 0;
+  }
+  .slider-card:hover {
+    transform: translateY(-2px);
+    border-color: #171717;
+  }
+  .slider-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: white;
+    border: 1px solid #d4d4d4;
+    color: #171717;
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .slider-nav:hover { background: #171717; color: white; }
+  .slider-nav.left-1 { left: -4px; }
+  .slider-nav.right-1 { right: -4px; }
+
+  @media (max-width: 640px) {
+    .slider-card { width: 140px; height: 185px; }
+    .slider-nav { width: 32px; height: 32px; font-size: 20px; }
+    .slider-nav.left-1 { left: 8px; }
+    .slider-nav.right-1 { right: 8px; }
+  }
+
+  /* Lightbox */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .lightbox.hidden { display: none; }
+  .lb-content {
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  #lb-img {
+    max-width: 90vw;
+    max-height: 78vh;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #1a1a1a;
+  }
+  .lb-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: white;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .lb-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+  }
+  .lb-emoji { font-size: 16px; }
+  .lb-label { font-weight: 500; }
+  .lb-counter { color: rgba(255, 255, 255, 0.6); font-size: 12px; }
+  .lb-cta {
+    background: white;
+    color: #171717;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .lb-cta:hover { background: #f5f5f5; }
+  .lb-cta.hidden { display: none; }
+
+  .lb-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lb-close:hover { background: rgba(255, 255, 255, 0.2); }
+  .lb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lb-nav:hover { background: rgba(255, 255, 255, 0.25); }
+  .lb-prev { left: 24px; }
+  .lb-next { right: 24px; }
+
+  @media (max-width: 640px) {
+    .lb-prev { left: 8px; }
+    .lb-next { right: 8px; }
+    .lb-nav { width: 40px; height: 40px; font-size: 22px; }
+  }
+</style>
+
+<script>
+  const track = document.getElementById("slider-track") as HTMLElement | null;
+  const prev = document.getElementById("slider-prev");
+  const next = document.getElementById("slider-next");
+
+  function step(): number {
+    if (!track) return 220;
+    const card = track.querySelector(".slider-card") as HTMLElement | null;
+    if (!card) return 220;
+    return card.offsetWidth + 14;
+  }
+
+  // Auto-scroll (slow, infinite loop using duplicated items)
+  let paused = false;
+  let resumeTimer: number | null = null;
+  let pos = 0;
+  const SPEED_PX_PER_FRAME = 0.6; // ~36px/sec at 60fps
+
+  function pauseFor(ms: number) {
+    paused = true;
+    if (resumeTimer) window.clearTimeout(resumeTimer);
+    resumeTimer = window.setTimeout(() => { paused = false; resumeTimer = null; }, ms);
+  }
+
+  function loop() {
+    if (track) {
+      if (!paused) {
+        pos += SPEED_PX_PER_FRAME;
+        const half = track.scrollWidth / 2;
+        if (half > 0 && pos >= half) pos -= half;
+        track.scrollLeft = Math.floor(pos);
+      } else {
+        // sync pos with current scroll so resume continues smoothly
+        pos = track.scrollLeft;
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+  if (track) {
+    track.addEventListener("mouseenter", () => { paused = true; });
+    track.addEventListener("mouseleave", () => { if (!resumeTimer) paused = false; });
+    track.addEventListener("touchstart", () => pauseFor(4000), { passive: true });
+    requestAnimationFrame(loop);
+  }
+
+  prev?.addEventListener("click", () => {
+    track?.scrollBy({ left: -step() * 2, behavior: "smooth" });
+    pauseFor(3000);
+  });
+  next?.addEventListener("click", () => {
+    track?.scrollBy({ left: step() * 2, behavior: "smooth" });
+    pauseFor(3000);
+  });
+
+  // Lightbox
+  type Item = { i: number; src: string; label: string; emoji: string; link: string };
+  const items: Item[] = track ? JSON.parse(track.dataset.items || "[]") : [];
+
+  const lb = document.getElementById("lightbox")!;
+  const lbImg = document.getElementById("lb-img") as HTMLImageElement;
+  const lbEmoji = document.getElementById("lb-emoji")!;
+  const lbLabel = document.getElementById("lb-label")!;
+  const lbCounter = document.getElementById("lb-counter")!;
+  const lbCta = document.getElementById("lb-cta") as HTMLAnchorElement;
+  const lbClose = document.getElementById("lb-close")!;
+  const lbPrev = document.getElementById("lb-prev")!;
+  const lbNext = document.getElementById("lb-next")!;
+
+  let currentIndex = 0;
+
+  function show(i: number) {
+    if (items.length === 0) return;
+    currentIndex = ((i % items.length) + items.length) % items.length;
+    const it = items[currentIndex];
+    lbImg.src = it.src;
+    lbImg.alt = `${it.label} 샘플`;
+    lbEmoji.textContent = it.emoji;
+    lbLabel.textContent = it.label;
+    lbCounter.textContent = `${currentIndex + 1} / ${items.length}`;
+    if (it.link) {
+      lbCta.href = it.link;
+      lbCta.classList.remove("hidden");
+    } else {
+      lbCta.classList.add("hidden");
+    }
+    lb.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    paused = true;
+  }
+  function hide() {
+    lb.classList.add("hidden");
+    document.body.style.overflow = "";
+    paused = false;
+  }
+
+  document.querySelectorAll(".slider-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      const idx = parseInt((card as HTMLElement).dataset.index || "0", 10);
+      show(idx);
+    });
+  });
+
+  lbClose.addEventListener("click", hide);
+  lbPrev.addEventListener("click", () => show(currentIndex - 1));
+  lbNext.addEventListener("click", () => show(currentIndex + 1));
+  lb.addEventListener("click", (e) => {
+    if (e.target === lb) hide();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (lb.classList.contains("hidden")) return;
+    if (e.key === "Escape") hide();
+    else if (e.key === "ArrowLeft") show(currentIndex - 1);
+    else if (e.key === "ArrowRight") show(currentIndex + 1);
+  });
+</script>

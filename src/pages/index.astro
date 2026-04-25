@@ -1,17 +1,75 @@
 ---
-
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { CATEGORIES } from "../data/categories.ts";
+import SampleSlider from "../components/SampleSlider.astro";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout>
+  <section class="max-w-6xl mx-auto px-5 pt-14 pb-8">
+    <h1 class="text-[26px] sm:text-3xl md:text-5xl font-bold text-center tracking-tight mb-5 leading-tight text-balance break-keep">
+      챗GPT 이미지 프롬프트 인핸서
+    </h1>
+    <p class="text-center text-neutral-600 text-base md:text-lg max-w-2xl mx-auto leading-relaxed break-keep">
+      카테고리를 고르고 원하는 내용을 넣으면, 프롬프트가 자동으로 완성됩니다.
+    </p>
+  </section>
+
+  <SampleSlider />
+
+  <section class="max-w-6xl mx-auto px-5 pt-12 pb-20">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+      {CATEGORIES.map((c) => (
+        <a
+          href={`/category/${c.id}`}
+          class="group relative bg-white border border-neutral-200 rounded-xl p-5 hover:border-neutral-900 hover:shadow-md transition-all flex flex-col gap-2"
+        >
+          <div class="text-3xl">{c.emoji}</div>
+          <div class="font-semibold text-neutral-900 text-base">{c.label}</div>
+          <div class="text-sm text-neutral-500 leading-relaxed line-clamp-2">{c.description}</div>
+          {c.subTabs && (
+            <span class="absolute top-3 right-3 text-[10px] px-1.5 py-0.5 bg-neutral-100 text-neutral-600 border border-neutral-200 rounded-full">
+              {c.subTabs.length} 종류
+            </span>
+          )}
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="max-w-6xl mx-auto px-5 pb-12">
+    <h2 class="text-xs font-semibold text-neutral-500 tracking-wider uppercase mb-3">확장 도구</h2>
+    <a
+      href="/storybook"
+      class="group relative block bg-gradient-to-br from-purple-50 via-white to-pink-50 border border-neutral-200 rounded-xl p-6 hover:border-purple-400 hover:shadow-md transition-all"
+    >
+      <div class="flex items-start gap-4">
+        <div class="text-4xl">📖</div>
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-neutral-900">동화책 프롬프트 생성기</span>
+            <span class="text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-700 border border-purple-200 rounded-full">NEW</span>
+          </div>
+          <div class="text-sm text-neutral-600 mt-1 leading-relaxed">
+            아이 사진 + 스타일 + 스토리 4단계로 동화책 한 권 분량의 프롬프트를 한 번에 생성합니다.
+          </div>
+        </div>
+        <div class="text-neutral-400 group-hover:text-purple-600 transition-colors">→</div>
+      </div>
+    </a>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-5 pb-20">
+    <div class="bg-neutral-50 border border-neutral-200 rounded-xl p-6">
+      <div class="text-base font-semibold text-neutral-900 mb-2 flex items-center gap-2">
+        <span>💭</span><span>Thinking 모드 활용</span>
+      </div>
+      <p class="text-base text-neutral-700 leading-relaxed">
+        ChatGPT 유료 플랜에서 <b>Thinking 모드</b> 또는 <b>확장</b>을 켜면 두 가지가 추가로 가능합니다:
+      </p>
+      <ul class="mt-3 space-y-1.5 text-base text-neutral-700 leading-relaxed">
+        <li>① 한 번에 최대 8장 생성 (캐릭터·스타일 일관성 유지)</li>
+        <li>② 온라인 검색 + 자동 반영 (트렌드·통계·특정 사이트 정보)</li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

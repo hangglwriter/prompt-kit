@@ -1,0 +1,384 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { CATEGORIES, getCategory } from "../../data/categories.ts";
+import { getPresetsByCategory } from "../../data/stylePresets.ts";
+import { ASPECT_OPTIONS, NEGATIVE_EXAMPLES } from "../../lib/buildPrompt.ts";
+import { getSamplesByCategory } from "../../data/samples.ts";
+
+export function getStaticPaths() {
+  return CATEGORIES.map((c) => ({ params: { id: c.id } }));
+}
+
+const { id } = Astro.params;
+const category = getCategory(id!);
+if (!category) {
+  return Astro.redirect("/");
+}
+const presets = getPresetsByCategory(category.id);
+const samples = getSamplesByCategory(category.id);
+const ex = category.examples;
+---
+
+<BaseLayout title={`${category.label} - 프롬키트`}>
+  <section class="max-w-6xl mx-auto px-5 pt-8 pb-4">
+    <a href="/" class="text-base text-neutral-500 hover:text-neutral-900">&larr; 카테고리</a>
+    <div class="mt-3 flex items-center gap-3">
+      <span class="text-3xl">{category.emoji}</span>
+      <h1 class="text-2xl md:text-3xl font-bold tracking-tight">{category.label}</h1>
+    </div>
+    <p class="text-neutral-600 mt-2 text-base">{category.description}</p>
+
+    <div class="mt-5 bg-neutral-50 border border-neutral-200 rounded-lg p-5 text-base text-neutral-700 leading-relaxed">
+      💡 <b>넣을 수 있는 내용만 채워 보세요.</b> 비워둔 칸은 알아서 빠집니다.<br />
+      프롬프트만으로 아쉬울 땐 영상에서 알려드린 대로 <b>ChatGPT에게 먼저 "이런 걸 만들고 싶은데 어떻게 기획하면 좋을까?"</b>라고 물어보고, 마음에 드는 아이디어가 나오면 그걸로 그림을 만들어 보세요.
+    </div>
+
+    {category.subTabs && (
+      <div class="mt-5 flex gap-2 flex-wrap">
+        {category.subTabs.map((t, i) => (
+          <button
+            data-subtab={t.id}
+            class={`subtab-btn px-4 py-2 text-base rounded-full border transition-colors ${
+              i === 0
+                ? "bg-neutral-900 text-white border-neutral-900"
+                : "bg-white text-neutral-600 border-neutral-300 hover:border-neutral-500"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <section class="max-w-6xl mx-auto px-5 pb-20 grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,420px)] gap-6">
+    <!-- LEFT: Form -->
+    <div id="form-root" class="bg-white border border-neutral-200 rounded-xl p-5 md:p-6 space-y-5" data-prefix={category.promptPrefix ?? ""}>
+      <!-- 1. Purpose -->
+      <div>
+        <label class="text-base font-semibold text-neutral-900 flex items-center gap-1.5">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-neutral-900 text-white text-sm">1</span>
+          만드는 목적 / 맥락
+        </label>
+        <p class="text-sm text-neutral-500 mt-1.5 leading-relaxed">
+          어디에 쓸 건지·어떤 분위기인지만 짧게 (<span class="text-neutral-700 font-medium">"{category.promptPrefix ?? category.label}"</span>은 자동으로 들어가요)
+        </p>
+        <textarea
+          id="f-purpose"
+          rows="2"
+          class="mt-2 w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-base focus:outline-none focus:border-neutral-900"
+          placeholder={ex.purpose}
+        ></textarea>
+      </div>
+
+      <!-- 2. Audience -->
+      <div>
+        <label class="text-base font-semibold text-neutral-900 flex items-center gap-1.5">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-neutral-900 text-white text-sm">2</span>
+          누가 보는지 (대상)
+        </label>
+        <p class="text-sm text-neutral-500 mt-1.5 leading-relaxed">타겟 독자·시청자</p>
+        <input
+          id="f-audience"
+          type="text"
+          class="mt-2 w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-base focus:outline-none focus:border-neutral-900"
+          placeholder={ex.audience}
+        />
+      </div>
+
+      <!-- 3. Texts -->
+      <div>
+        <label class="text-base font-semibold text-neutral-900 flex items-center gap-1.5">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-neutral-900 text-white text-sm">3</span>
+          들어갈 글자
+        </label>
+        <p class="text-sm text-neutral-500 mt-1.5 leading-relaxed">화면에 정확히 박힐 텍스트 (한 줄에 하나씩)</p>
+        <textarea
+          id="f-texts"
+          rows="3"
+          class="mt-2 w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-base focus:outline-none focus:border-neutral-900 font-mono"
+          placeholder={ex.texts.replace(/^예: /, "").replaceAll(" / ", "\n")}
+        ></textarea>
+      </div>
+
+      <!-- 4. Style -->
+      <div>
+        <div class="flex items-center justify-between">
+          <label class="text-base font-semibold text-neutral-900 flex items-center gap-1.5">
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-neutral-900 text-white text-sm">4</span>
+            원하는 스타일
+          </label>
+          {presets.length > 0 && (
+            <button id="open-presets" class="text-sm text-neutral-600 hover:text-neutral-900 underline underline-offset-2">💡 예시 보기 ({presets.length}장)</button>
+          )}
+        </div>
+        <p class="text-sm text-neutral-500 mt-1.5 leading-relaxed">느낌·레퍼런스·구도·색감을 한 단락으로 (키워드 한두 개만 적어도 OK)</p>
+        <textarea
+          id="f-style"
+          rows="4"
+          class="mt-2 w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-base focus:outline-none focus:border-neutral-900"
+          placeholder={ex.style}
+        ></textarea>
+      </div>
+
+      <!-- 5. Aspect -->
+      <div>
+        <label class="text-base font-semibold text-neutral-900 flex items-center gap-1.5">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-neutral-900 text-white text-sm">5</span>
+          비율
+        </label>
+        <p class="text-sm text-neutral-500 mt-1.5 leading-relaxed">기본은 자동. 카드뉴스 1:1, 표지 3:4, 썸네일 16:9 추천</p>
+        <div class="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {ASPECT_OPTIONS.map((opt, i) => (
+            <label class="cursor-pointer">
+              <input
+                type="radio"
+                name="aspect"
+                value={opt.id}
+                class="sr-only peer"
+                checked={i === 0}
+              />
+              <div class="px-3 py-2.5 text-base border border-neutral-300 rounded-lg text-center peer-checked:border-neutral-900 peer-checked:bg-neutral-900 peer-checked:text-white hover:border-neutral-500 transition-colors">
+                <span class="font-medium">{opt.label}</span>
+                {opt.ratio && <span class="text-sm ml-1 opacity-70">{opt.ratio}</span>}
+              </div>
+            </label>
+          ))}
+        </div>
+        <input
+          id="f-custom-aspect"
+          type="text"
+          class="mt-2 w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:border-neutral-900 hidden"
+          placeholder="예: 3:1, 1:3, 21:9"
+        />
+        <p class="text-xs text-neutral-500 mt-2">💡 GPT 이미지 2.0은 가로 3:1부터 세로 1:3까지 지원</p>
+      </div>
+
+      <!-- 6. Negatives -->
+      <div>
+        <label class="text-base font-semibold text-neutral-900 flex items-center gap-1.5">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-neutral-900 text-white text-sm">6</span>
+          원하지 않는 것
+        </label>
+        <p class="text-sm text-neutral-500 mt-1.5 leading-relaxed">결과물에서 빼고 싶은 것을 쉼표(,)로 구분해서 적어 주세요</p>
+        <input
+          id="f-negatives"
+          type="text"
+          class="mt-2 w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-base focus:outline-none focus:border-neutral-900"
+          placeholder="예: 워터마크, 실존 인물, 영어 문구"
+        />
+        <div class="mt-2 flex flex-wrap gap-1.5">
+          <span class="text-sm text-neutral-500 mr-1">빠른 추가:</span>
+          {NEGATIVE_EXAMPLES.map((n) => (
+            <button
+              type="button"
+              data-negative={n}
+              class="negative-chip text-sm px-3 py-1 bg-neutral-100 text-neutral-700 border border-neutral-200 rounded-full hover:border-neutral-500 hover:bg-neutral-200 transition-colors"
+            >
+              + {n}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- 7. Search (optional) -->
+      <div class="border-t border-neutral-200 pt-5">
+        <label class="flex items-center gap-2 cursor-pointer flex-wrap">
+          <input id="f-search-toggle" type="checkbox" class="w-4 h-4 accent-neutral-900" />
+          <span class="text-sm font-semibold text-neutral-900">⊕ 온라인 검색 추가 (선택)</span>
+          <span class="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-medium">Thinking 모드 전용</span>
+        </label>
+        <div id="search-fields" class="hidden mt-3 space-y-3">
+          <div>
+            <label class="text-sm text-neutral-700 font-medium">무엇을 검색할까요?</label>
+            <input id="f-search-query" type="text" class="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:border-neutral-900" placeholder="예: 최근 유행하는 노션 템플릿, 2026년 색상 트렌드" />
+          </div>
+          <div>
+            <label class="text-sm text-neutral-700 font-medium">어떤 정보를 뽑아 반영?</label>
+            <input id="f-search-fields-text" type="text" class="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:border-neutral-900" placeholder="예: 이름·가격·특징 3가지, 주요 컬러 팔레트" />
+          </div>
+          <div class="text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 leading-relaxed">
+            ⚠️ 온라인 검색 기능을 쓸 때는 <b>오류가 있을 수 있으니 결과 내용은 꼭 직접 확인</b>하세요. (가격·수치·날짜 등)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Preview -->
+    <div class="lg:sticky lg:top-20 lg:self-start space-y-4">
+      <div class="bg-neutral-900 text-white rounded-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-semibold opacity-70">최종 프롬프트</span>
+          <button
+            id="copy-btn"
+            class="text-sm px-3 py-1.5 bg-white text-neutral-900 rounded font-medium hover:bg-neutral-100 transition-colors"
+          >
+            📋 복사
+          </button>
+        </div>
+        <pre id="preview" class="text-sm leading-relaxed whitespace-pre-wrap font-mono opacity-90 min-h-[200px]"></pre>
+        <a
+          href="https://chat.openai.com/"
+          target="_blank"
+          rel="noopener"
+          class="mt-3 block w-full text-center px-3 py-2.5 bg-white text-neutral-900 rounded-lg text-base font-medium hover:bg-neutral-100 transition-colors"
+        >
+          🚀 ChatGPT 열기
+        </a>
+      </div>
+
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900 leading-relaxed">
+        💡 <b>ChatGPT에 붙일 때</b><br />
+        ① 입력창 도구 메뉴에서 <b>이미지 선택</b><br />
+        ② <b>화면 비율 메뉴</b>에서도 원하는 비율 한 번 더 선택<br />
+        ③ 검색을 켰다면 <b>Thinking 모드</b>도 같이 켜기
+      </div>
+    </div>
+  </section>
+
+  {samples.length > 0 && (
+    <section class="max-w-6xl mx-auto px-5 pb-16">
+      <h2 class="text-xl font-semibold text-neutral-900 mb-4">이런 결과가 나옵니다</h2>
+      <p class="text-sm text-neutral-500 mb-5">{category.label} 카테고리로 만든 실제 결과 샘플입니다. 클릭하면 크게 볼 수 있어요.</p>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        {samples.map((s) => (
+          <a
+            href={s.src}
+            target="_blank"
+            rel="noopener"
+            class="block bg-neutral-100 border border-neutral-200 rounded-lg overflow-hidden hover:border-neutral-500 transition-colors"
+          >
+            <img
+              src={s.src}
+              alt={`${category.label} 샘플`}
+              class="w-full h-auto aspect-[3/4] object-cover"
+              loading="lazy"
+            />
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Preset Modal -->
+  <div id="preset-modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-3xl w-full max-h-[85vh] overflow-y-auto">
+      <div class="sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-neutral-900">스타일 예시</h3>
+        <button id="close-presets" class="text-3xl text-neutral-400 hover:text-neutral-900 leading-none">&times;</button>
+      </div>
+      <div class="p-6 space-y-4">
+        {presets.map((p) => (
+          <button
+            data-fragment={p.fragment}
+            class="preset-card w-full text-left bg-white border border-neutral-200 rounded-lg p-5 hover:border-neutral-900 transition-colors"
+          >
+            <div class="font-semibold text-neutral-900 text-base">{p.label}</div>
+            <div class="text-sm text-neutral-600 mt-1.5 leading-relaxed">{p.description}</div>
+            <div class="text-sm text-neutral-500 mt-3 italic leading-relaxed">"{p.fragment}"</div>
+            <div class="text-sm text-neutral-900 mt-3 font-semibold">→ 이 스타일 적용</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { buildPrompt, ASPECT_OPTIONS } from "../../lib/buildPrompt.ts";
+
+  const form = {
+    purpose: document.getElementById("f-purpose") as HTMLTextAreaElement,
+    audience: document.getElementById("f-audience") as HTMLInputElement,
+    texts: document.getElementById("f-texts") as HTMLTextAreaElement,
+    style: document.getElementById("f-style") as HTMLTextAreaElement,
+    aspect: () => (document.querySelector("input[name=aspect]:checked") as HTMLInputElement)?.value || "auto",
+    customAspect: document.getElementById("f-custom-aspect") as HTMLInputElement,
+    negatives: document.getElementById("f-negatives") as HTMLInputElement,
+    searchToggle: document.getElementById("f-search-toggle") as HTMLInputElement,
+    searchQuery: document.getElementById("f-search-query") as HTMLInputElement,
+    searchFields: document.getElementById("f-search-fields-text") as HTMLInputElement,
+  };
+  const preview = document.getElementById("preview")!;
+  const copyBtn = document.getElementById("copy-btn")!;
+  const customAspectInput = form.customAspect;
+  const searchFieldsBox = document.getElementById("search-fields")!;
+
+  function update() {
+    const aspect = form.aspect();
+    customAspectInput.classList.toggle("hidden", aspect !== "custom");
+    searchFieldsBox.classList.toggle("hidden", !form.searchToggle.checked);
+
+    const result = buildPrompt({
+      prefix: (document.getElementById("form-root") as HTMLElement)?.dataset.prefix || "",
+      purpose: form.purpose.value,
+      audience: form.audience.value,
+      texts: form.texts.value.split("\n"),
+      style: form.style.value,
+      aspect,
+      customAspect: form.customAspect.value,
+      negatives: form.negatives.value.split(","),
+      search: {
+        enabled: form.searchToggle.checked,
+        query: form.searchQuery.value,
+        fields: form.searchFields.value,
+      },
+    });
+    preview.textContent = result;
+  }
+
+  // Quick-add chips for negatives
+  document.querySelectorAll(".negative-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const word = (chip as HTMLElement).dataset.negative || "";
+      const current = form.negatives.value.trim();
+      const items = current ? current.split(",").map((l) => l.trim()) : [];
+      if (!items.includes(word)) {
+        form.negatives.value = current ? `${current}, ${word}` : word;
+        update();
+      }
+    });
+  });
+
+  document.querySelectorAll("input, textarea").forEach((el) => {
+    el.addEventListener("input", update);
+    el.addEventListener("change", update);
+  });
+
+  copyBtn.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(preview.textContent || "");
+    copyBtn.textContent = "✓ 복사됨!";
+    setTimeout(() => (copyBtn.textContent = "📋 복사"), 1500);
+  });
+
+  // Modal
+  const modal = document.getElementById("preset-modal");
+  document.getElementById("open-presets")?.addEventListener("click", () => modal?.classList.remove("hidden"));
+  document.getElementById("close-presets")?.addEventListener("click", () => modal?.classList.add("hidden"));
+  modal?.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.add("hidden");
+  });
+  document.querySelectorAll(".preset-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      const fragment = (card as HTMLElement).dataset.fragment || "";
+      const current = form.style.value.trim();
+      form.style.value = current ? `${current}\n${fragment}` : fragment;
+      modal?.classList.add("hidden");
+      update();
+    });
+  });
+
+  // Subtabs (visual only for MVP)
+  document.querySelectorAll(".subtab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".subtab-btn").forEach((b) => {
+        b.classList.remove("bg-neutral-900", "text-white", "border-neutral-900");
+        b.classList.add("bg-white", "text-neutral-600", "border-neutral-300");
+      });
+      btn.classList.add("bg-neutral-900", "text-white", "border-neutral-900");
+      btn.classList.remove("bg-white", "text-neutral-600", "border-neutral-300");
+    });
+  });
+
+  update();
+</script>

@@ -1,0 +1,78 @@
+---
+const links = [
+  { href: "https://www.youtube.com/@hangglwriter", label: "유튜브", icon: "🎬" },
+  { href: "https://cafe.naver.com/fortylab", label: "카페", icon: "📗" },
+  { href: "https://storywinner.co.kr", label: "스토리위너", icon: "🌐" },
+];
+const cta = { href: "https://storywinner.co.kr/winner-writing", label: "위너책쓰기 7주 코칭" };
+---
+
+<header class="border-b border-neutral-200 bg-white/80 backdrop-blur sticky top-0 z-30">
+  <div class="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2 font-semibold text-neutral-900 hover:opacity-80">
+      <span class="text-xl">🧰</span>
+      <span class="text-base tracking-tight">프롬키트</span>
+      <span class="hidden sm:inline text-xs text-neutral-400 ml-1">PromptKit</span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-1">
+      {links.map((l) => (
+        <a
+          href={l.href}
+          target="_blank"
+          rel="noopener"
+          class="px-3 py-1.5 text-sm text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md flex items-center gap-1.5 transition-colors"
+        >
+          <span>{l.icon}</span>
+          <span>{l.label}</span>
+        </a>
+      ))}
+      <a
+        href={cta.href}
+        target="_blank"
+        rel="noopener"
+        class="ml-2 px-3.5 py-1.5 text-sm font-medium bg-neutral-900 text-white rounded-md hover:bg-neutral-700 transition-colors flex items-center gap-1"
+      >
+        <span>📖</span>
+        <span>{cta.label}</span>
+        <span class="text-xs">→</span>
+      </a>
+    </nav>
+
+    <button id="menu-toggle" class="md:hidden text-neutral-700 text-2xl" aria-label="메뉴">☰</button>
+  </div>
+
+  <div id="mobile-menu" class="hidden md:hidden border-t border-neutral-200 bg-white">
+    <div class="max-w-6xl mx-auto px-5 py-2 flex flex-col">
+      {links.map((l) => (
+        <a
+          href={l.href}
+          target="_blank"
+          rel="noopener"
+          class="py-2.5 text-sm text-neutral-700 hover:text-neutral-900 flex items-center gap-2"
+        >
+          <span>{l.icon}</span>
+          <span>{l.label}</span>
+        </a>
+      ))}
+      <a
+        href={cta.href}
+        target="_blank"
+        rel="noopener"
+        class="py-2.5 text-sm font-medium text-neutral-900 flex items-center gap-2 border-t border-neutral-100 mt-1"
+      >
+        <span>📖</span>
+        <span>{cta.label}</span>
+        <span class="text-xs">→</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById("menu-toggle");
+  const menu = document.getElementById("mobile-menu");
+  toggle?.addEventListener("click", () => {
+    menu?.classList.toggle("hidden");
+  });
+</script>

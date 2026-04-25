@@ -1,0 +1,11 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import StorybookApp from "../components/storybook/App";
+---
+
+<BaseLayout
+  title="동화책 프롬프트 생성기 - 프롬키트"
+  description="아이 사진으로 나만의 동화책을 만드는 GPT Image 전용 프롬프트 생성기"
+>
+  <StorybookApp client:load />
+</BaseLayout>

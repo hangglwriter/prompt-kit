@@ -1,0 +1,30 @@
+---
+const channels = [
+  { href: "https://www.youtube.com/@hangglwriter", label: "유튜브 행글라이터", icon: "🎬" },
+  { href: "https://cafe.naver.com/fortylab", label: "카페", icon: "📗" },
+  { href: "https://storywinner.co.kr", label: "스토리위너", icon: "🌐" },
+  { href: "https://storywinner.co.kr/winner-writing", label: "위너책쓰기 7주 코칭", icon: "📖" },
+];
+---
+
+<footer class="border-t border-neutral-200 bg-neutral-50 mt-20">
+  <div class="max-w-6xl mx-auto px-5 py-10">
+    <div class="text-sm text-neutral-500 mb-4">프롬키트 · 행글라이터</div>
+    <div class="flex flex-wrap gap-2 mb-6">
+      {channels.map((c) => (
+        <a
+          href={c.href}
+          target="_blank"
+          rel="noopener"
+          class="px-3 py-1.5 text-sm text-neutral-700 bg-white border border-neutral-200 rounded-full hover:border-neutral-400 hover:bg-neutral-100 transition-colors flex items-center gap-1.5"
+        >
+          <span>{c.icon}</span>
+          <span>{c.label}</span>
+        </a>
+      ))}
+    </div>
+    <div class="text-xs text-neutral-400 border-t border-neutral-200 pt-4">
+      &copy; 2026 StoryWinner Company. All rights reserved.
+    </div>
+  </div>
+</footer>
