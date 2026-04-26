@@ -17,9 +17,7 @@ import VideoEmbed from "../components/VideoEmbed.astro";
 
   <VideoEmbed />
 
-  <SampleSlider />
-
-  <section class="max-w-6xl mx-auto px-5 pt-12 pb-20">
+  <section class="max-w-6xl mx-auto px-5 pt-2 pb-8">
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
       {CATEGORIES.map((c) => (
         <a
@@ -60,6 +58,8 @@ import VideoEmbed from "../components/VideoEmbed.astro";
       </div>
     </a>
   </section>
+
+  <SampleSlider />
 
   <section class="max-w-3xl mx-auto px-5 pb-20">
     <div class="bg-neutral-50 border border-neutral-200 rounded-xl p-6">

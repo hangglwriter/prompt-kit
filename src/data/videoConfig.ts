@@ -4,5 +4,5 @@
 export const VIDEO = {
   id: "xlju_X7Ogec",
   title: "이 도구로 GPT 이미지 2.0 활용하는 법",
-  caption: "비개발자도 5조각만 채우면, 검증된 GPT 이미지 2.0 프롬프트가 자동으로 완성됩니다.",
+  caption: "",
 };
