@@ -57,6 +57,10 @@ export const SAMPLES: Sample[] = [
   { src: "/samples/webtoon-02.png", category: "webtoon" },
   { src: "/samples/webtoon-03.png", category: "webtoon" },
 
+  // 굿즈 (책갈피 등)
+  { src: "/samples/goods-01.png", category: "goods" },
+  { src: "/samples/goods-02.png", category: "goods" },
+
   // 기타
   { src: "/samples/other-01.png", category: "other" },
 ];
@@ -76,6 +80,7 @@ export const GALLERY_SECTIONS: GallerySection[] = [
   { id: "poster", label: "포스터", emoji: "📰", link: "/category/poster" },
   { id: "infographic", label: "인포그래픽", emoji: "📊", link: "/category/infographic" },
   { id: "mockup", label: "목업", emoji: "🖼️", link: "/category/mockup" },
+  { id: "goods", label: "굿즈", emoji: "🎁", link: "/category/goods" },
   { id: "storybook", label: "동화책", emoji: "📖", description: "동화책 프롬프트 생성기 도구로 만든 결과", link: "/storybook" },
   { id: "webtoon", label: "웹툰", emoji: "💬" },
   { id: "other", label: "기타", emoji: "✨" },
